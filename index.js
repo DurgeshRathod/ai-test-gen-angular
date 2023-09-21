@@ -129,7 +129,7 @@ async function main() {
     messages: [ASSISTANT, { role: "user", content: prompt_text }],
   });
 
-  outputText = response.choices[0].message.content.replace(/\n/g, "");
+  outputText = response.choices[0].message.content;
 
   if (outputText.endsWith("```")) {
     outputText = outputText.slice(0, outputText.length - 3);

@@ -42,4 +42,4 @@ For better result you can store your class models, types, enum, interface in fil
 3. .interface.ts
 4. reading for files which are exported from a index.ts is currently not supported
 
-Please be aware that the generated file may occasionally contain superfluous or absent characters at its start or end. In such cases, it may be necessary to perform manual adjustments. This is a natural aspect of utilizing generative AI technology.
+Please be aware that the generated file will not be directly executable but hopefully it generates a code snippet to lessen the effort of the developer. In some cases, the file may contain superfluous or absent characters at its start or end. In such cases, it may be necessary to perform manual adjustments. This is a natural aspect of utilizing generative AI technology.
