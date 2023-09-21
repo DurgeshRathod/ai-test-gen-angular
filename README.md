@@ -4,12 +4,14 @@
 
 ## Key Features:
 
-- Harnesses the power of OpenAI for intelligent test generation.
-- Automates the creation of unit tests for Angular components and services.
-- Enhances code quality and reliability by providing comprehensive test coverage.
-- Easily customizable to adapt to specific testing requirements.
-- Streamlines your development process, allowing you to focus on building exceptional applications.
-- Discover a new level of efficiency and confidence in your Angular development with ai-test-gen-angular. Start writing tests
+1. **Intelligent Test Generation:**
+   ai-test-gen-angular intelligently generates unit tests for Angular components and services. While it provides a solid foundation, manual adjustments may be required to ensure the generated tests are executable and meet your specific needs.
+
+2. **Time and Effort Savings:**
+   Automating test creation with ai-test-gen-angular significantly reduces the time and effort spent on writing tests. However, it's important to note that some manual fine-tuning may be necessary to achieve optimal results.
+
+3. **Enhanced Code Quality:**
+   The tool offers comprehensive test coverage, helping to improve code reliability. While it's a powerful aid, developers should be aware that the generated tests may require adjustments to be fully effective.
 
 ## Usage
 
@@ -31,6 +33,12 @@ export OPEN_API_KEY=somekey
 
 ```bash
 node ./node_modules/ai-test-gen-angular/index.js <src/path/to/component/or/service/ts-file> <src/path/to/ts-config-file>
+```
+
+4. Example
+
+```bash
+node ./node_modules/ai-test-gen-angular/index.js src/app/app.component.ts ./tsconfig.json
 ```
 
 ## Note
