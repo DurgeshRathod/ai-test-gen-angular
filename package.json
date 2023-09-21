@@ -1,0 +1,32 @@
+{
+  "name": "ai-test-gen-angular",
+  "version": "0.0.1",
+  "description": "ai-test-gen-angular is a powerful tool that leverages OpenAI's advanced capabilities to automate the generation of unit tests for your Angular components and services",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DurgeshRathod/ai-test-gen-angular.git"
+  },
+  "keywords": [
+    "ai",
+    "unit",
+    "test",
+    "generate",
+    "angular",
+    "auto",
+    "unit",
+    "test"
+  ],
+  "author": "Durgesh Rathod",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DurgeshRathod/ai-test-gen-angular/issues"
+  },
+  "homepage": "https://github.com/DurgeshRathod/ai-test-gen-angular#readme",
+  "dependencies": {
+    "openai": "^4.8.0"
+  }
+}
