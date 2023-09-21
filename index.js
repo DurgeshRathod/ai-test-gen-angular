@@ -33,7 +33,7 @@ if (process.argv[3]) {
 }
 let tsconfig = { compilerOptions: { path: {} } };
 try {
-  console.log("Reading ", tsconfigPath);
+  console.log("\nReading ", tsconfigPath);
   tsconfig = require(tsconfigPath);
 } catch (error) {
   console.error("ERROR: tsconfig not present at root folder\n", error);
@@ -123,7 +123,7 @@ async function main() {
   prompt_text = "Code: ```import{";
   prompt_text += concatenatedData;
   const ASSISTANT = { role: "system", content: system_prompt };
-  console.log("Creating unit tests");
+  console.log("\nCreating unit tests ⏳⏳");
   const response = await openai.chat.completions.create({
     model: "gpt-3.5-turbo-16k",
     messages: [ASSISTANT, { role: "user", content: prompt_text }],
@@ -146,8 +146,9 @@ async function main() {
     .split("/")
     .filter((f) => f !== "." || f !== "..")
     .join("/");
-  console.log("File written to the path : ", outputFile);
+
   console.log(
-    "\n \nFor better result you can store your class models, types, enum, interface in files with extension \n1) .model.ts \n2) .enum.ts \n3) .interface.ts\n4) reading for files which are exported from a index.ts is currently not supported \n\n NOTE: the generated file may have some extra or missing charecters at the start or end of the file which may need to be removed or added manually."
+    "\n \n------------------------------------------------------\nFor better result you can store your class models, types, enum, interface in files with extension \n1) .model.ts \n2) .enum.ts \n3) .interface.ts\n4) reading for files which are exported from a index.ts is currently not supported \n\n NOTE: the generated file may have some extra or missing characters at the start or end of the file which may need to be removed or added manually."
   );
+  console.log("\n\nCreated !!! ✅✅ \nFile written to the path : 🔗 ", outputFile, "\n");
 }
