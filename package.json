@@ -1,6 +1,6 @@
 {
   "name": "ai-test-gen-angular",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "ai-test-gen-angular is a powerful tool that leverages OpenAI's advanced capabilities to automate the generation of unit tests for your Angular components and services",
   "main": "index.js",
   "scripts": {

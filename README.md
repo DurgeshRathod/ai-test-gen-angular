@@ -31,5 +31,15 @@ export OPEN_API_KEY=somekey
 
 ```bash
 node ./node_modules/ai-test-gen-angular/index.js <src/path/to/component/or/service/ts-file> <src/path/to/ts-config-file>
-
 ```
+
+## Note
+
+For better result you can store your class models, types, enum, interface in files with extension
+
+1. .model.ts
+2. .enum.ts
+3. .interface.ts
+4. reading for files which are exported from a index.ts is currently not supported
+
+Please be aware that the generated file may occasionally contain superfluous or absent characters at its start or end. In such cases, it may be necessary to perform manual adjustments. This is a natural aspect of utilizing generative AI technology.
