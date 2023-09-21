@@ -130,7 +130,7 @@ async function main() {
   });
 
   outputText = response.choices[0].message.content.replace(/\n/g, "");
-  console.log("outputText", outputText);
+
   if (outputText.endsWith("```")) {
     outputText = outputText.slice(0, outputText.length - 3);
   }
