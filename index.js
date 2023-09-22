@@ -94,8 +94,11 @@ fs.readFile(targetFilePath, "utf8", async (err, data) => {
   paths = paths.map((p) => p + ".ts");
   paths.push(targetFilePath);
 
-  for (const filePath of paths) {
+  for ([index, filePath] of paths.entries()) {
     try {
+      if (index == paths.length - 1) {
+        concatenatedData += "Generate Unit test for Below code : ";
+      }
       console.log("Reading ", filePath);
       concatenatedData += " " + fs.readFileSync(filePath, "utf8");
     } catch (error) {
@@ -119,7 +122,7 @@ function countOccurrences(str, substr) {
 
 async function main() {
   system_prompt =
-    "Act as a angular developer use jasmine to write a unit test file for below code with maximum coverage for statements and branches. Prepare mock data by yourself based on the model/interface/class. Write only the unit test code as string output in the output and nothing else. And very important don't add any single line comments and make sure all the opening brackets are closed properly ";
+    "Act as a angular developer use jasmine to write a unit test file for below code with maximum coverage for statements and branches and Make sure to test edge cases and handle potential error scenarios. Prepare mock data by yourself based on the model/interface/class. Write only the unit test code as string output in the output and nothing else. And very important don't add any single line comments and make sure all the opening brackets are closed properly ";
   prompt_text = "Code: ```import{";
   prompt_text += concatenatedData;
   const ASSISTANT = { role: "system", content: system_prompt };
