@@ -26,7 +26,7 @@ npm i ai-test-gen-angular
 2. Set Open API key in env
 
 ```bash
-export OPEN_API_KEY=somekey
+export OPENAI_API_KEY=somekey
 ```
 
 3. Generate Unit Tests (run this command in the root folder of your project)

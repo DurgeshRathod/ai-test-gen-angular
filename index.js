@@ -4,11 +4,11 @@ let currPath = process.argv[1];
 currPath = currPath.split("/");
 let projectAbosultePath = currPath.slice(0, currPath.length - 3).join("/");
 
-if (!process.env.OPEN_API_KEY) {
-  throw Error("Environment variable OPEN_API_KEY is missing");
+if (!process.env.OPENAI_API_KEY) {
+  throw Error("Environment variable OPENAI_API_KEY is missing");
 }
 const openai = new OpenAI({
-  apiKey: process.env.OPEN_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY,
 });
 let prompt_text = "";
 let targetFilePath = process.argv[2];
