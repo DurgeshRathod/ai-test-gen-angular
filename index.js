@@ -55,58 +55,11 @@ if (tsconfig.compilerOptions && tsconfig.compilerOptions.paths) {
 
 let outputFile = targetFilePath.replace(".ts", ".ai-test-gen.spec.ts");
 let concatenatedData = "";
-let paths = [];
-let targetFilePathElements = targetFilePath.split("/");
-fs.readFile(targetFilePath, "utf8", async (err, data) => {
-  if (err) {
-    console.error(err);
-    return;
-  }
-  const pattern = /from ['"]([^'"]+)['"]/g;
-
-  let match;
-  while ((match = pattern.exec(data)) !== null) {
-    paths.push(match[1]);
-  }
-
-  Object.keys(pathMap).forEach((key) => {
-    paths.forEach((path, i) => {
-      if (path.includes(key)) {
-        paths[i] = path.replace(key, pathMap[key]);
-      }
-    });
-  });
-  paths = paths.filter(
-    (p) => p.includes(".model") || p.includes(".enum") || p.includes(".interface")
-  );
-  paths.forEach((path, i) => {
-    let count = countOccurrences(path, "..");
-    if (count > 0) {
-      let tillIdx = targetFilePathElements.length - 1 - count;
-      let newpath = targetFilePathElements.slice(0, tillIdx);
-      path = path.split("/").filter((f) => f !== "..");
-      newpath.push(...path);
-      paths[i] = newpath.join("/");
-    } else {
-      paths[i] = `${projectAbosultePath}/${path}`;
-    }
-  });
-  paths = paths.map((p) => p + ".ts");
-  paths.push(targetFilePath);
-
-  for ([index, filePath] of paths.entries()) {
-    try {
-      if (index == paths.length - 1) {
-        concatenatedData += "Generate Unit test for Below code : ";
-      }
-      console.log("Reading ", filePath);
-      concatenatedData += " " + fs.readFileSync(filePath, "utf8");
-    } catch (error) {
-      // Handle error
-    }
-  }
-  main();
-});
+concatenatedData = readFilesRecursivelyForModels(
+  targetFilePath,
+  "Generate Unit test for Below code : ",
+  []
+);
 
 function countOccurrences(str, substr) {
   let count = 0;
@@ -120,6 +73,51 @@ function countOccurrences(str, substr) {
   return count;
 }
 
+function readFilesRecursivelyForModels(currFilePath, prefixedString, alreadyReadFiles) {
+  const currFilePathElements = currFilePath.split("/");
+  const pattern = /from ['"]([^'"]+)['"]/g;
+  try {
+    if (alreadyReadFiles.includes(currFilePath)) {
+      return "";
+    }
+    console.log("\nReading  ", currFilePath);
+    alreadyReadFiles.push(currFilePath);
+    let data = fs.readFileSync(currFilePath, "utf8");
+
+    let match;
+    childData = "";
+    while ((match = pattern.exec(data)) !== null) {
+      let path = match[1];
+      if (path.includes(".model") || path.includes(".enum") || path.includes(".interface")) {
+        Object.keys(pathMap).forEach((key) => {
+          path = path.replace(key, pathMap[key]);
+        });
+        let doubleDotCount = countOccurrences(path, "../");
+        let singleDotCount = countOccurrences(path, "./");
+        if (doubleDotCount > 0) {
+          let tillIdx = currFilePathElements.length - 1 - doubleDotCount;
+          let newpath = currFilePathElements.slice(0, tillIdx);
+          newpath.push(...path.split("/").filter((f) => f !== ".."));
+          path = newpath.join("/");
+        } else if (singleDotCount > 0) {
+          let tillIdx = currFilePathElements.length - 1;
+          let newpath = currFilePathElements.slice(0, tillIdx);
+          newpath.push(...path.split("/").filter((f) => f !== "."));
+          path = newpath.join("/");
+        } else {
+          path = `${projectAbosultePath}/${path}`;
+        }
+        path = path + ".ts";
+        childData = childData + " " + readFilesRecursivelyForModels(path, "", alreadyReadFiles);
+      }
+    }
+
+    return childData + prefixedString + data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 async function main() {
   system_prompt =
     "Act as a angular developer use jasmine to write a unit test file for below code with maximum coverage for statements and branches and Make sure to test edge cases and handle potential error scenarios. Prepare mock data by yourself based on the model/interface/class. Write only the unit test code as string output in the output and nothing else. And very important don't add any single line comments and make sure all the opening brackets are closed properly ";
@@ -128,6 +126,7 @@ async function main() {
   const ASSISTANT = { role: "system", content: system_prompt };
   console.log("\nCreating unit tests ⏳⏳");
   const response = await openai.chat.completions.create({
+    temperature: 0,
     model: "gpt-3.5-turbo-16k",
     messages: [ASSISTANT, { role: "user", content: prompt_text }],
   });
@@ -153,5 +152,6 @@ async function main() {
   console.log(
     "\n \n------------------------------------------------------\nFor better result you can store your class models, types, enum, interface in files with extension \n1) .model.ts \n2) .enum.ts \n3) .interface.ts\n4) reading for files which are exported from a index.ts is currently not supported \n\n NOTE: the generated file may have some extra or missing characters at the start or end of the file which may need to be removed or added manually."
   );
-  console.log("\n\nCreated !!! ✅✅ \nFile written to the path : 🔗 ", outputFile, "\n");
+  console.log("\n\nCreated !!! ✅✅ \nFile written to the path 👉 : 🔗 ", outputFile, "\n");
 }
+main();
