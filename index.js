@@ -10,7 +10,7 @@ if (!process.env.OPENAI_API_KEY) {
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-let prompt_text = "";
+
 let targetFilePath = process.argv[2];
 targetFilePath = targetFilePath
   .split("/")
@@ -119,10 +119,11 @@ function readFilesRecursivelyForModels(currFilePath, prefixedString, alreadyRead
 }
 
 async function main() {
-  system_prompt =
-    "Act as a angular developer. The project test cases should be jasmine based. So write a unit test file for below code with maximum coverage for statements and branches and Make sure to test edge cases and handle potential error scenarios. Prepare mock data by yourself based on the model/interface/class. Write only the unit test code as string output in the output and nothing else. And very important don't add any single line comments and make sure all the opening brackets are closed properly ";
-  prompt_text = "Code: ```import{";
+  let system_prompt =
+    "You are a angular unit test generator tool which will output only the generated unit test file which uses jasmine framework, Follow the instructions word by word. Instructions: Ensure that the tests have maximum coverage for both statements and branches. Additionally, make sure to test edge cases and handle potential error scenarios. Ensure that all opening brackets are properly closed.";
+  let prompt_text = "";
   prompt_text += concatenatedData;
+  prompt_text = prompt_text + " output: ";
   const ASSISTANT = { role: "system", content: system_prompt };
   console.log("\nCreating unit tests ⏳⏳");
   const response = await openai.chat.completions.create({
