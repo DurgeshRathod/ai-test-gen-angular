@@ -136,12 +136,6 @@ async function main() {
   if (outputText.endsWith("```")) {
     outputText = outputText.slice(0, outputText.length - 3);
   }
-  if (!outputText.startsWith("{") && !outputText.startsWith("import")) {
-    let idx = outputText.indexOf("import");
-    if (idx >= 0) {
-      outputText = outputText.slice(idx);
-    }
-  }
   outputText = outputText.startsWith("{") ? `import ${outputText}` : outputText;
   fs.writeFileSync(outputFile, outputText);
   outputFile = outputFile

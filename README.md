@@ -32,8 +32,11 @@ export OPENAI_API_KEY=somekey
 3. Generate Unit Tests (run this command in the root folder of your project)
 
 ```bash
-node ./node_modules/ai-test-gen-angular/index.js <src/path/to/component/or/service/ts-file> <src/path/to/ts-config-file>
+node ./node_modules/ai-test-gen-angular/index.js <relative/path/to/component/or/service/ts-file> <relative/path/to/ts-config-file>
 ```
+
+IMPORTANT:
+Please note that you need to give relative path from the project root to your component/service file and also to the tsconfig.json file. (if you have multiple tsconfig.json file, then please use that file in which you have mentioned the alias path for your subfolders)
 
 4. Example
 
