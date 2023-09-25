@@ -13,7 +13,7 @@
 3. **Enhanced Code Quality:**
    The tool offers comprehensive test coverage, helping to improve code reliability. While it's a powerful aid, developers should be aware that the generated tests may require adjustments to be fully effective.
 
-## Usage
+## Setup
 
 To get started with `ai-test-gen-angular`, follow these simple steps:
 
@@ -32,7 +32,7 @@ export OPENAI_API_KEY=somekey
 3. Generate Unit Tests (run this command in the root folder of your project)
 
 ```bash
-node ./node_modules/ai-test-gen-angular/index.js <relative/path/to/service/or/somecomponent.component.ts> <relative/path/to/tsconfig.json>
+node ./node_modules/ai-test-gen-angular/index.js "relative/path/to/service/or/somecomponent.component.ts" "relative/path/to/tsconfig.json" [--read-from-index-files]
 ```
 
 IMPORTANT:
@@ -46,10 +46,31 @@ Please note that you need to give relative path from the project root
 if you want to exclude some files from being scanned then you can add a comment at the top of that file  
 `// EXCLUDE_AI_TEST_GEN_SCAN `
 
+
+## Command Usage
+```bash
+node ./node_modules/ai-test-gen-angular/index.js "relative/path/to/some-filename.component.ts" "./tsconfig.json" [--read-from-index-files]
+```
+#### Description
+Generates Angular unit tests for the specified TypeScript file using AI-based testing techniques.
+
+#### Arguments
+- `<relative/path/to/component/or/service/ts-file>`  
+  The relative path to the TypeScript file of the component or service for which you want to generate tests.
+
+- `<relative/path/to/tsconfig-file>`  
+  The relative path to the tsconfig.json file that configures your Angular project.
+
+#### Options
+- `--read-from-index-files`  
+  Use this flag to instruct the tool to generate tests by reading models/enums exported via  index.ts files.
+
+
+
 ## Example
 
 ```bash
-node node ./node_modules/ai-test-gen-angular/index.js src/app/pipes/get-number-suffix.pipe.ts ./tsconfig.base.json
+node node ./node_modules/ai-test-gen-angular/index.js src/app/pipes/get-number-suffix.pipe.ts ./tsconfig.base.json 
 ```
 
 #### Input file
@@ -141,6 +162,12 @@ describe("GetNumberSuffixPipe", () => {
     expect(pipe.transform(100)).toBe("th");
   });
 });
+```
+### Example 2
+#### Reading data from index files
+
+```bash
+node node ./node_modules/ai-test-gen-angular/index.js src/app/pipes/get-number-suffix.pipe.ts ./tsconfig.base.json --read-from-index-files
 ```
 
 ## Note

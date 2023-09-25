@@ -1,6 +1,10 @@
 const fs = require("fs");
 const OpenAI = require("openai");
 let currPath = process.argv[1];
+let targetFilePath = process.argv[2];
+let shouldReadFromIndex =
+  typeof process.argv[4] == "string" ? process.argv[4].includes("--read-from-index-files") : false;
+console.log("shouldReadFromIndex", process.argv[4], shouldReadFromIndex);
 currPath = currPath.split("/");
 let projectAbosultePath = currPath.slice(0, currPath.length - 3).join("/");
 
@@ -11,16 +15,20 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-let targetFilePath = process.argv[2];
 targetFilePath = targetFilePath
   .split("/")
   .filter((f) => f !== "." || f !== "..")
   .join("/");
 targetFilePath = `${projectAbosultePath}/${targetFilePath}`;
-if (process.argv.length !== 4) {
+if (process.argv.includes("--help")) {
+  help();
+  return;
+}
+if (process.argv.length < 4) {
   console.log(
     "\nERROR: Incorrect command. \n\nUSAGE : node ./node_modules/ai-test-gen-angular/index.js <relative/path/to/component/or/service/ts-file> <relative/path/to/tsconfig-file>\n"
   );
+  help();
   return;
 }
 let tsconfigPath = `${projectAbosultePath}/tsconfig.json`;
@@ -115,10 +123,11 @@ function readFilesRecursivelyForModels(currFilePath, prefixedString, alreadyRead
         childData =
           childData + " " + readFilesRecursivelyForModels(importPath, "", alreadyReadFiles);
       } else if (
-        importPath.endsWith("/models") ||
-        importPath.endsWith("/enums") ||
-        importPath.endsWith("/interfaces") ||
-        importPath.includes("/types")
+        shouldReadFromIndex &&
+        (importPath.endsWith("/models") ||
+          importPath.endsWith("/enums") ||
+          importPath.endsWith("/interfaces") ||
+          importPath.includes("/types"))
       ) {
         if (alreadyReadFiles.includes(importPath + "/index.ts")) {
           continue;
@@ -231,5 +240,12 @@ async function main() {
     "\n \n------------------------------------------------------\nFor better result you can store your class models, types, enum, interface in files with extension \n1) .model.ts \n2) .enum.ts \n3) .interface.ts\n4) reading for files which are exported from a index.ts is currently not supported \n\n NOTE: the generated file may have some extra or missing characters at the start or end of the file which may need to be removed or added manually."
   );
   console.log("\n\nCreated !!! ✅✅ \nFile written to the path 👉 : 🔗 ", outputFile, "\n");
+}
+function help() {
+  let helpData = fs.readFileSync(
+    projectAbosultePath + "/node_modules/ai-test-gen-angular/command-help.txt",
+    "utf-8"
+  );
+  console.log(helpData);
 }
 main();
