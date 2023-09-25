@@ -32,25 +32,133 @@ export OPENAI_API_KEY=somekey
 3. Generate Unit Tests (run this command in the root folder of your project)
 
 ```bash
-node ./node_modules/ai-test-gen-angular/index.js <relative/path/to/component/or/service/ts-file> <relative/path/to/ts-config-file>
+node ./node_modules/ai-test-gen-angular/index.js <relative/path/to/service/or/somecomponent.component.ts> <relative/path/to/tsconfig.json>
 ```
 
 IMPORTANT:
-Please note that you need to give relative path from the project root to your component/service file and also to the tsconfig.json file. (if you have multiple tsconfig.json file, then please use that file in which you have mentioned the alias path for your subfolders)
+Please note that you need to give relative path from the project root
 
-4. Example
+- to your component/service file
+- and also to the tsconfig.json file. (if you have multiple tsconfig.json file, then please use that file in which you have mentioned the alias path for your subfolders)
+
+## Restrict scanning for selected files
+
+if you want to exclude some files from being scanned then you can add a comment at the top of that file  
+`// EXLUDE_AI_TEST_GEN_SCAN `
+
+## Example
 
 ```bash
-node ./node_modules/ai-test-gen-angular/index.js src/app/app.component.ts ./tsconfig.json
+node node ./node_modules/ai-test-gen-angular/index.js src/app/pipes/get-number-suffix.pipe.ts ./tsconfig.base.json
+```
+
+#### Input file
+
+```javascript
+import { Pipe, PipeTransform } from "@angular/core";
+
+@Pipe({
+  name: "getNumberSuffix",
+  pure: false,
+})
+export class GetNumberSuffixPipe implements PipeTransform {
+  transform(number: number) {
+    let suffix;
+
+    if (number >= 11 && number <= 13) {
+      suffix = "th";
+    } else {
+      const lastDigit = number % 10;
+      switch (lastDigit) {
+        case 1:
+          suffix = "st";
+          break;
+        case 2:
+          suffix = "nd";
+          break;
+        case 3:
+          suffix = "rd";
+          break;
+        default:
+          suffix = "th";
+          break;
+      }
+    }
+
+    return suffix;
+  }
+}
+```
+
+#### Generated output test case file
+
+File is generated in same folder as of its input file : src/app/pipes/get-number-suffix.pipe.ai-test-gen.spec.ts
+
+```javascript
+import { GetNumberSuffixPipe } from "./get-number-suffix.pipe";
+
+describe("GetNumberSuffixPipe", () => {
+  let pipe: GetNumberSuffixPipe;
+
+  beforeEach(() => {
+    pipe = new GetNumberSuffixPipe();
+  });
+
+  it("should create an instance", () => {
+    expect(pipe).toBeTruthy();
+  });
+
+  it('should return "th" for numbers between 11 and 13', () => {
+    expect(pipe.transform(11)).toBe("th");
+    expect(pipe.transform(12)).toBe("th");
+    expect(pipe.transform(13)).toBe("th");
+  });
+
+  it('should return "st" for numbers ending with 1', () => {
+    expect(pipe.transform(1)).toBe("st");
+    expect(pipe.transform(21)).toBe("st");
+    expect(pipe.transform(31)).toBe("st");
+  });
+
+  it('should return "nd" for numbers ending with 2', () => {
+    expect(pipe.transform(2)).toBe("nd");
+    expect(pipe.transform(22)).toBe("nd");
+    expect(pipe.transform(32)).toBe("nd");
+  });
+
+  it('should return "rd" for numbers ending with 3', () => {
+    expect(pipe.transform(3)).toBe("rd");
+    expect(pipe.transform(23)).toBe("rd");
+    expect(pipe.transform(33)).toBe("rd");
+  });
+
+  it('should return "th" for all other numbers', () => {
+    expect(pipe.transform(4)).toBe("th");
+    expect(pipe.transform(10)).toBe("th");
+    expect(pipe.transform(20)).toBe("th");
+    expect(pipe.transform(30)).toBe("th");
+    expect(pipe.transform(40)).toBe("th");
+    expect(pipe.transform(100)).toBe("th");
+  });
+});
 ```
 
 ## Note
 
-For better result you can store your class models, types, enum, interface in files with extension
+For better result you can store your class models, types, enum, interface in files with an extension below
+
+We scan files with below extensions
 
 1. .model.ts
 2. .enum.ts
 3. .interface.ts
-4. reading for files which are exported from a index.ts is currently not supported
+4. .type.ts
+
+and folders with naming conventin
+
+1. models/
+2. enums/
+3. interfaces/
+4. types/
 
 Please be aware that the generated file will not be directly executable but hopefully it generates a code snippet to lessen the effort of the developer. In some cases, the file may contain superfluous or absent characters at its start or end. In such cases, it may be necessary to perform manual adjustments. This is a natural aspect of utilizing generative AI technology.

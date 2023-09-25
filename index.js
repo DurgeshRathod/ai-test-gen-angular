@@ -19,7 +19,7 @@ targetFilePath = targetFilePath
 targetFilePath = `${projectAbosultePath}/${targetFilePath}`;
 if (process.argv.length !== 4) {
   console.log(
-    "\nERROR: Incorrect command. \n\nUSAGE : node ./node_modules/ai-test-gen-angular/index.js <src/path/to/component/or/service/ts-file> <src/path/to/ts-config-file>\n"
+    "\nERROR: Incorrect command. \n\nUSAGE : node ./node_modules/ai-test-gen-angular/index.js <relative/path/to/component/or/service/ts-file> <relative/path/to/tsconfig.json>\n"
   );
   return;
 }
@@ -73,42 +73,83 @@ function countOccurrences(str, substr) {
   return count;
 }
 
+function scanReadFile(filePath) {
+  let data = fs.readFileSync(filePath, "utf8");
+  if (data.includes("EXLUDE_AI_TEST_GEN_SCAN")) {
+    console.log("\n Excluded Scanning  ", filePath);
+    return "";
+  }
+  console.log("\n Scanning  ", filePath);
+  return data;
+}
+
 function readFilesRecursivelyForModels(currFilePath, prefixedString, alreadyReadFiles) {
   const currFilePathElements = currFilePath.split("/");
-  const pattern = /from ['"]([^'"]+)['"]/g;
+  const pattern = /import\s*(?:{([^}]*)})?\s*(?:([^{}\n]+))?\s*from\s*['"]([^'"]+)['"]/g;
+
   try {
     if (alreadyReadFiles.includes(currFilePath)) {
       return "";
     }
-    console.log("\nReading  ", currFilePath);
+
     alreadyReadFiles.push(currFilePath);
-    let data = fs.readFileSync(currFilePath, "utf8");
+    let data = scanReadFile(currFilePath);
 
     let match;
     childData = "";
-    while ((match = pattern.exec(data)) !== null) {
-      let path = match[1];
-      if (path.includes(".model") || path.includes(".enum") || path.includes(".interface")) {
-        Object.keys(pathMap).forEach((key) => {
-          path = path.replace(key, pathMap[key]);
-        });
-        let doubleDotCount = countOccurrences(path, "../");
-        let singleDotCount = countOccurrences(path, "./");
-        if (doubleDotCount > 0) {
-          let tillIdx = currFilePathElements.length - 1 - doubleDotCount;
-          let newpath = currFilePathElements.slice(0, tillIdx);
-          newpath.push(...path.split("/").filter((f) => f !== ".."));
-          path = newpath.join("/");
-        } else if (singleDotCount > 0) {
-          let tillIdx = currFilePathElements.length - 1;
-          let newpath = currFilePathElements.slice(0, tillIdx);
-          newpath.push(...path.split("/").filter((f) => f !== "."));
-          path = newpath.join("/");
-        } else {
-          path = `${projectAbosultePath}/${path}`;
+    while ((match = pattern.exec(data))) {
+      const namedImports = match[1] ? match[1].split(",").map((name) => name.trim()) : [];
+      const defaultImport = match[2] ? match[2].trim() : null;
+      let importPath = match[3];
+      Object.keys(pathMap).forEach((key) => {
+        importPath = importPath.replace(key, pathMap[key]);
+      });
+      importPath = convertToProjectAbsPath(currFilePathElements, importPath);
+      if (
+        importPath.includes(".model") ||
+        importPath.includes(".enum") ||
+        importPath.includes(".interface") ||
+        importPath.includes(".type")
+      ) {
+        importPath = importPath + ".ts";
+        childData =
+          childData + " " + readFilesRecursivelyForModels(importPath, "", alreadyReadFiles);
+      } else if (
+        importPath.endsWith("/models") ||
+        importPath.endsWith("/enums") ||
+        importPath.endsWith("/interfaces") ||
+        importPath.includes("/types")
+      ) {
+        if (alreadyReadFiles.includes(importPath + "/index.ts")) {
+          continue;
         }
-        path = path + ".ts";
-        childData = childData + " " + readFilesRecursivelyForModels(path, "", alreadyReadFiles);
+        alreadyReadFiles.push(importPath + "/index.ts");
+        let indexFileData = scanReadFile(importPath + "/index.ts");
+        let indexFilePathElements = [...importPath.split("/"), "index.ts"];
+
+        const regex = /(['"])(.*?)\1/g;
+
+        possibilitiesFileNames = [...indexFileData.matchAll(regex)].map((match) => match[2]).sort();
+        for (let namedIndex = 0; namedIndex < namedImports.length; namedIndex++) {
+          const namedImportClassName = namedImports[namedIndex];
+          let actualFileNames = maxSequentialOccurrence(
+            namedImportClassName,
+            possibilitiesFileNames
+          );
+          actualFileNames = actualFileNames.map((fileName) => {
+            return fileName.split("/").join("/");
+          });
+          for (let actualFileIdx = 0; actualFileIdx < actualFileNames.length; actualFileIdx++) {
+            const actualFileName = actualFileNames[actualFileIdx];
+
+            let actualFilePath = convertToProjectAbsPath(
+              indexFilePathElements,
+              actualFileName + ".ts"
+            );
+            childData =
+              childData + " " + readFilesRecursivelyForModels(actualFilePath, "", alreadyReadFiles);
+          }
+        }
       }
     }
 
@@ -118,6 +159,49 @@ function readFilesRecursivelyForModels(currFilePath, prefixedString, alreadyRead
   }
 }
 
+function convertToProjectAbsPath(currFilePathElements, importPath) {
+  let doubleDotCount = countOccurrences(importPath, "../");
+  let singleDotCount = countOccurrences(importPath, "./");
+  if (doubleDotCount > 0) {
+    let tillIdx = currFilePathElements.length - 1 - doubleDotCount;
+    let newpath = currFilePathElements.slice(0, tillIdx);
+    newpath.push(...importPath.split("/").filter((f) => f !== ".."));
+    importPath = newpath.join("/");
+  } else if (singleDotCount > 0) {
+    let tillIdx = currFilePathElements.length - 1;
+    let newpath = currFilePathElements.slice(0, tillIdx);
+    newpath.push(...importPath.split("/").filter((f) => f !== "."));
+    importPath = newpath.join("/");
+  } else {
+    importPath = `${projectAbosultePath}/${importPath}`;
+  }
+  return importPath;
+}
+function maxSequentialOccurrence(givenString, possibilities) {
+  const matches = [];
+  givenString = givenString.toLowerCase();
+  possibilities = possibilities.map((p) => p.toLowerCase());
+  for (const element of possibilities) {
+    let currentPos = 0;
+    let isMatch = false;
+
+    for (const char of element) {
+      if (char === givenString[currentPos]) {
+        currentPos++;
+        if (currentPos === givenString.length) {
+          isMatch = true;
+          break;
+        }
+      }
+    }
+
+    if (isMatch) {
+      matches.push(element);
+    }
+  }
+
+  return matches;
+}
 async function main() {
   let system_prompt =
     "You are a angular unit test generator tool which will output only the generated unit test file which uses jasmine framework, Follow the instructions word by word. Instructions: Ensure that the tests have maximum coverage for both statements and branches. Additionally, make sure to test edge cases and handle potential error scenarios. Ensure that all opening brackets are properly closed.";
@@ -133,7 +217,6 @@ async function main() {
   });
 
   outputText = response.choices[0].message.content;
-
   if (outputText.endsWith("```")) {
     outputText = outputText.slice(0, outputText.length - 3);
   }
