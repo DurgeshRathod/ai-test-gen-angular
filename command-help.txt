@@ -1,6 +1,6 @@
 
 # Command Usage
-$ ./node_modules/ai-test-gen-angular "relative/path/to/somecomponent.component.ts" "./tsconfig.json" [--read-from-index-files]
+$ node ./node_modules/ai-test-gen-angular "relative/path/to/somecomponent.component.ts" "./tsconfig.json" [--read-from-index-files]
 
 Description
 Generates Angular unit tests for the specified TypeScript file using AI-based testing techniques.
