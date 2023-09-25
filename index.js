@@ -19,7 +19,7 @@ targetFilePath = targetFilePath
 targetFilePath = `${projectAbosultePath}/${targetFilePath}`;
 if (process.argv.length !== 4) {
   console.log(
-    "\nERROR: Incorrect command. \n\nUSAGE : node ./node_modules/ai-test-gen-angular/index.js <relative/path/to/component/or/service/ts-file> <relative/path/to/tsconfig.json>\n"
+    "\nERROR: Incorrect command. \n\nUSAGE : node ./node_modules/ai-test-gen-angular/index.js <relative/path/to/component/or/service/ts-file> <relative/path/to/tsconfig-file>\n"
   );
   return;
 }
@@ -75,7 +75,7 @@ function countOccurrences(str, substr) {
 
 function scanReadFile(filePath) {
   let data = fs.readFileSync(filePath, "utf8");
-  if (data.includes("EXLUDE_AI_TEST_GEN_SCAN")) {
+  if (data.includes("EXCLUDE_AI_TEST_GEN_SCAN")) {
     console.log("\n Excluded Scanning  ", filePath);
     return "";
   }

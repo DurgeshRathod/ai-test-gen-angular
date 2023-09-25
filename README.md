@@ -2,7 +2,7 @@
 
 **ai-test-gen-angular** is a powerful tool that leverages OpenAI's advanced capabilities to automate the generation of unit tests for your Angular components and services. This innovative package intelligently analyzes your codebase and produces comprehensive test cases, saving you time and effort in the testing process. Seamlessly integrate it into your Angular projects and watch as it enhances your development workflow by ensuring robust and reliable code.
 
-## Key Features:
+## Key Features
 
 1. **Intelligent Test Generation:**
    ai-test-gen-angular intelligently generates unit tests for Angular components and services. While it provides a solid foundation, manual adjustments may be required to ensure the generated tests are executable and meet your specific needs.
@@ -44,7 +44,7 @@ Please note that you need to give relative path from the project root
 ## Restrict scanning for selected files
 
 if you want to exclude some files from being scanned then you can add a comment at the top of that file  
-`// EXLUDE_AI_TEST_GEN_SCAN `
+`// EXCLUDE_AI_TEST_GEN_SCAN `
 
 ## Example
 
