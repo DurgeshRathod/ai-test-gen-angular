@@ -120,7 +120,7 @@ function readFilesRecursivelyForModels(currFilePath, prefixedString, alreadyRead
 
 async function main() {
   system_prompt =
-    "Act as a angular developer use jasmine to write a unit test file for below code with maximum coverage for statements and branches and Make sure to test edge cases and handle potential error scenarios. Prepare mock data by yourself based on the model/interface/class. Write only the unit test code as string output in the output and nothing else. And very important don't add any single line comments and make sure all the opening brackets are closed properly ";
+    "Act as a angular developer. The project test cases should be jasmine based. So write a unit test file for below code with maximum coverage for statements and branches and Make sure to test edge cases and handle potential error scenarios. Prepare mock data by yourself based on the model/interface/class. Write only the unit test code as string output in the output and nothing else. And very important don't add any single line comments and make sure all the opening brackets are closed properly ";
   prompt_text = "Code: ```import{";
   prompt_text += concatenatedData;
   const ASSISTANT = { role: "system", content: system_prompt };
