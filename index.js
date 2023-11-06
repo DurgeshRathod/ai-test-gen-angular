@@ -27,9 +27,6 @@ if (process.argv.includes("--aws-bedrock")) {
 } else if (!process.env.OPENAI_API_KEY) {
   throw Error("Environment variable OPENAI_API_KEY is missing");
 }
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 targetFilePath = targetFilePath
   .split("/")
@@ -245,6 +242,10 @@ async function main() {
   console.log("\nCreating unit tests ⏳⏳");
   let outputText = "";
   if (!process.argv.includes("--aws-bedrock")) {
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+    
     const response = await openai.chat.completions.create({
       temperature: 0,
       model: "gpt-3.5-turbo-16k",
