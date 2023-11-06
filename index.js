@@ -1,14 +1,30 @@
+const AnthropicBedrock = require("@anthropic-ai/bedrock-sdk");
 const fs = require("fs");
 const OpenAI = require("openai");
 let currPath = process.argv[1];
 let targetFilePath = process.argv[2];
 let shouldReadFromIndex =
   typeof process.argv[4] == "string" ? process.argv[4].includes("--read-from-index-files") : false;
-console.log("shouldReadFromIndex", process.argv[4], shouldReadFromIndex);
 currPath = currPath.split("/");
 let projectAbosultePath = currPath.slice(0, currPath.length - 3).join("/");
 
-if (!process.env.OPENAI_API_KEY) {
+if (process.argv.includes("--aws-bedrock")) {
+  if (!process.env.AWS_ACCESS_KEY) {
+    throw Error(
+      "Environment variable AWS_ACCESS_KEY is missing. It is required if you want to use the flag `--aws-bedrock`"
+    );
+  }
+  if (!process.env.AWS_SECRET_KEY) {
+    throw Error(
+      "Environment variable AWS_SECRET_KEY is missing. It is required if you want to use the flag `--aws-bedrock`"
+    );
+  }
+  if (!process.env.AWS_REGION) {
+    throw Error(
+      "Environment variable AWS_REGION is missing. It is required if you want to use the flag `--aws-bedrock`"
+    );
+  }
+} else if (!process.env.OPENAI_API_KEY) {
   throw Error("Environment variable OPENAI_API_KEY is missing");
 }
 const openai = new OpenAI({
@@ -87,7 +103,7 @@ function scanReadFile(filePath) {
     console.log("\n Excluded Scanning  ", filePath);
     return "";
   }
-  console.log("\n Scanning  ", filePath);
+  console.log("\nScanning  ", filePath);
   return data;
 }
 
@@ -212,20 +228,46 @@ function maxSequentialOccurrence(givenString, possibilities) {
   return matches;
 }
 async function main() {
-  let system_prompt =
-    "You are a angular unit test generator tool which will output only the generated unit test file which uses jasmine framework, Follow the instructions word by word. Instructions: Ensure that the tests have maximum coverage for both statements and branches. Additionally, make sure to test edge cases and handle potential error scenarios. Ensure that all opening brackets are properly closed.";
+  let system_prompt = `### Task
+    Write unit test and output only the generated unit test code which uses jasmine framework:
+    ### Important Instructions
+    Follow the below instructions: 
+    1. Ensure that you write tests for each function present in the code.
+    2. Ensure maximum coverage for lines, function, statements and branches. 
+    3. Ensure that the generated mock data is as per the provided type interface, class or enum. Also validate that any nested models in the mock data conform to their defined interfaces/classes.
+    4. Additionally, make sure to test edge cases and handle potential error scenarios. 
+    5. Ensure that all opening brackets are properly closed.  
+  `;
   let prompt_text = "";
   prompt_text += concatenatedData;
   prompt_text = prompt_text + " output: ";
   const ASSISTANT = { role: "system", content: system_prompt };
   console.log("\nCreating unit tests ⏳⏳");
-  const response = await openai.chat.completions.create({
-    temperature: 0,
-    model: "gpt-3.5-turbo-16k",
-    messages: [ASSISTANT, { role: "user", content: prompt_text }],
-  });
+  let outputText = "";
+  if (!process.argv.includes("--aws-bedrock")) {
+    const response = await openai.chat.completions.create({
+      temperature: 0,
+      model: "gpt-3.5-turbo-16k",
+      messages: [ASSISTANT, { role: "user", content: prompt_text }],
+    });
 
-  outputText = response.choices[0].message.content;
+    outputText = response.choices[0].message.content;
+  } else {
+    const client = new AnthropicBedrock.AnthropicBedrock({
+      timeout: 1000 * 60 * 10,
+      awsAccessKey: process.env.AWS_ACCESS_KEY,
+      awsSecretKey: process.env.AWS_SECRET_KEY,
+      awsRegion: process.env.AWS_REGION,
+    });
+    outputText = await client.completions.create({
+      model: "anthropic.claude-v2",
+      max_tokens_to_sample: 80000,
+      prompt: `${AnthropicBedrock.HUMAN_PROMPT} ${system_prompt} \n ${prompt_text} ${AnthropicBedrock.AI_PROMPT}`,
+    });
+    outputText = outputText.completion;
+  }
+
+  console.log(outputText);
   if (outputText.endsWith("```")) {
     outputText = outputText.slice(0, outputText.length - 3);
   }
@@ -237,7 +279,7 @@ async function main() {
     .join("/");
 
   console.log(
-    "\n \n------------------------------------------------------\nFor better result you can store your class models, types, enum, interface in files with extension \n1) .model.ts \n2) .enum.ts \n3) .interface.ts\n4) reading for files which are exported from a index.ts is currently not supported \n\n NOTE: the generated file may have some extra or missing characters at the start or end of the file which may need to be removed or added manually."
+    "\n \n------------------------------------------------------\nFor better result you can store your class models, types, enum, interface in files with extension \n1) .model.ts \n2) .enum.ts \n3) .interface.ts \n\n NOTE: the generated file may have some extra or missing characters at the start or end of the file which may need to be removed or added manually."
   );
   console.log("\n\nCreated !!! ✅✅ \nFile written to the path 👉 : 🔗 ", outputFile, "\n");
 }

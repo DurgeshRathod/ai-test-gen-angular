@@ -26,13 +26,21 @@ npm i ai-test-gen-angular
 2. Set Open API key in environment variable.
 
 ```bash
+# if you want to use openai then do this
 export OPENAI_API_KEY=somekey
+```
+
+```bash
+# if you want to use aws bedrock then do this (you should use the flag --aws-bedrock while running the command)
+export AWS_ACCESS_KEY=****************
+export AWS_SECRET_KEY=****************
+export AWS_REGION=*********
 ```
 
 3. Generate Unit Tests (run this command in the root folder of your project)
 
 ```bash
-node ./node_modules/ai-test-gen-angular/index.js "relative/path/to/service/or/somecomponent.component.ts" "relative/path/to/tsconfig.json" [--read-from-index-files]
+node ./node_modules/ai-test-gen-angular/index.js "relative/path/to/service/or/somecomponent.component.ts" "relative/path/to/tsconfig.json" [--read-from-index-files] [--aws-bedrock]
 ```
 
 IMPORTANT:
@@ -49,7 +57,7 @@ if you want to exclude some files from being scanned then you can add a comment 
 ## Command Usage
 
 ```bash
-node ./node_modules/ai-test-gen-angular/index.js "relative/path/to/some-filename.component.ts" "./tsconfig.json" [--read-from-index-files]
+node ./node_modules/ai-test-gen-angular/index.js "relative/path/to/some-filename.component.ts" "./tsconfig.json" [--read-from-index-files] [--aws-bedrock]
 ```
 
 #### Description
@@ -68,6 +76,16 @@ Generates Angular unit tests for the specified TypeScript file using AI-based te
 
 - `--read-from-index-files`  
   Use this flag to instruct the tool to generate tests by reading models/enums exported via index.ts files.
+
+- `--aws-bedrock`
+  If you want to use AWS Bedrock anthropic claude instead of openAI, then use this flag.
+  You need to set 3 environment variables to use this flag
+
+```bash
+export AWS_ACCESS_KEY=****************
+export AWS_SECRET_KEY=****************
+export AWS_REGION=*********
+```
 
 ## Example
 

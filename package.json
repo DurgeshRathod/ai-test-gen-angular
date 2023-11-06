@@ -1,6 +1,6 @@
 {
   "name": "ai-test-gen-angular",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "ai-test-gen-angular is a powerful tool that leverages OpenAI's advanced capabilities to automate the generation of unit tests for your Angular components and services",
   "main": "index.js",
   "scripts": {
@@ -30,6 +30,7 @@
   },
   "homepage": "https://github.com/DurgeshRathod/ai-test-gen-angular#readme",
   "dependencies": {
+    "@anthropic-ai/bedrock-sdk": "^0.3.0",
     "openai": "^4.8.0"
   }
 }

@@ -16,6 +16,8 @@ Arguments
 Options
 - `--read-from-index-files`  
   Use this flag to instruct the tool to generate tests by reading from index files.
+- `--bedrock`
+  You need to set 3 env variable to use this flag `AWS_ACCESS_KEY`, `AWS_SECRET_KEY`, `AWS_REGION`
   
 
 Examples
