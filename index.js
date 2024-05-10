@@ -3,11 +3,10 @@ const fs = require("fs");
 const OpenAI = require("openai");
 let currPath = process.argv[1];
 let targetFilePath = process.argv[2];
-let shouldReadFromIndex =
-  typeof process.argv[4] == "string" ? process.argv[4].includes("--read-from-index-files") : false;
+let shouldReadFromIndex = process.argv.includes("--read-from-index-files");
 currPath = currPath.split("/");
 let projectAbosultePath = currPath.slice(0, currPath.length - 3).join("/");
-
+userCustomPrompt = "";
 if (process.argv.includes("--aws-bedrock")) {
   if (!process.env.AWS_ACCESS_KEY) {
     throw Error(
@@ -36,6 +35,11 @@ targetFilePath = `${projectAbosultePath}/${targetFilePath}`;
 if (process.argv.includes("--help")) {
   help();
   return;
+}
+if (process.argv.includes("-p")) {
+  let pidx = process.argv.indexOf("-p");
+  let pval = process.argv[pidx + 1];
+  userCustomPrompt = pval;
 }
 if (process.argv.length < 4) {
   console.log(
@@ -227,7 +231,7 @@ function maxSequentialOccurrence(givenString, possibilities) {
 async function main() {
   let system_prompt = `### Task
     Write unit test and output only the generated unit test code which uses jasmine framework:
-    ### Important Instructions
+    ### Important System Instructions
     Follow the below instructions: 
     1. Ensure that you write tests for each function present in the code.
     2. Ensure maximum coverage for lines, function, statements and branches. 
@@ -235,6 +239,10 @@ async function main() {
     4. Additionally, make sure to test edge cases and handle potential error scenarios. 
     5. Ensure that all opening brackets are properly closed.  
   `;
+  if (userCustomPrompt) {
+    userCustomPrompt = `\n\n Please note the user's may ask to compulsorily write test cases for some specified functions name with respect to provided code or any other unit test related task, so fullfil the user's ask at top priority related to unit tests. User Custom Query: ${userCustomPrompt}`;
+    system_prompt = system_prompt + userCustomPrompt;
+  }
   let prompt_text = "";
   prompt_text += concatenatedData;
   prompt_text = prompt_text + " output: ";
@@ -245,7 +253,7 @@ async function main() {
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
     });
-    
+
     const response = await openai.chat.completions.create({
       temperature: 0,
       model: "gpt-3.5-turbo-16k",

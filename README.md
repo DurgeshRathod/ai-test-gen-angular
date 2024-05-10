@@ -40,7 +40,7 @@ export AWS_REGION=*********
 3. Generate Unit Tests (run this command in the root folder of your project)
 
 ```bash
-node ./node_modules/ai-test-gen-angular/index.js "relative/path/to/service/or/somecomponent.component.ts" "relative/path/to/tsconfig.json" [--read-from-index-files] [--aws-bedrock]
+node ./node_modules/ai-test-gen-angular/index.js "relative/path/to/service/or/somecomponent.component.ts" "relative/path/to/tsconfig.json" [--read-from-index-files] [--aws-bedrock] [-p] [custom prompt (for e.g: write unit test for the function addTasks())]
 ```
 
 IMPORTANT:
@@ -57,7 +57,7 @@ if you want to exclude some files from being scanned then you can add a comment 
 ## Command Usage
 
 ```bash
-node ./node_modules/ai-test-gen-angular/index.js "relative/path/to/some-filename.component.ts" "./tsconfig.json" [--read-from-index-files] [--aws-bedrock]
+node ./node_modules/ai-test-gen-angular/index.js "relative/path/to/some-filename.component.ts" "./tsconfig.json" [--read-from-index-files] [--aws-bedrock] [-p] [custom prompt (for e.g: write unit test for the function addTasks())]
 ```
 
 #### Description
@@ -80,6 +80,8 @@ Generates Angular unit tests for the specified TypeScript file using AI-based te
 - `--aws-bedrock`
   If you want to use AWS Bedrock anthropic claude instead of openAI, then use this flag.
   You need to set 3 environment variables to use this flag
+- `-p`
+  If you want to ask a custom prompt for generating any specific unit test
 
 ```bash
 export AWS_ACCESS_KEY=****************
@@ -91,6 +93,10 @@ export AWS_REGION=*********
 
 ```bash
 node ./node_modules/ai-test-gen-angular/index.js src/app/pipes/get-number-suffix.pipe.ts ./tsconfig.base.json
+```
+
+```bash
+node ./node_modules/ai-test-gen-angular/index.js src/app/pipes/get-number-suffix.pipe.ts ./tsconfig.base.json -p "Write unit test for negative scenarios"
 ```
 
 #### Input file
