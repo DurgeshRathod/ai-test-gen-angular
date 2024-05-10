@@ -82,7 +82,7 @@ let outputFile = targetFilePath.replace(".ts", ".ai-test-gen.spec.ts");
 let concatenatedData = "";
 concatenatedData = readFilesRecursivelyForModels(
   targetFilePath,
-  "Generate Unit test for Below code : ",
+  "Generate Unit test for Below code based on user query : ",
   []
 );
 
@@ -240,7 +240,10 @@ async function main() {
     5. Ensure that all opening brackets are properly closed.  
   `;
   if (userCustomPrompt) {
-    userCustomPrompt = `\n\n Please note the user's may ask to compulsorily write test cases for some specified functions name with respect to provided code or any other unit test related task, so fullfil the user's ask at top priority related to unit tests. User Custom Query: ${userCustomPrompt}`;
+    let system_prompt = `### Task
+    Write unit test and output only the generated unit test code which uses jasmine framework based on user query:
+  `;
+    userCustomPrompt = `\n\n User Query: ${userCustomPrompt}`;
     system_prompt = system_prompt + userCustomPrompt;
   }
   let prompt_text = "";
@@ -255,7 +258,7 @@ async function main() {
     });
 
     const response = await openai.chat.completions.create({
-      temperature: 0,
+      temperature: 0.1,
       model: "gpt-3.5-turbo-16k",
       messages: [ASSISTANT, { role: "user", content: prompt_text }],
     });
