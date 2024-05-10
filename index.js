@@ -240,7 +240,7 @@ async function main() {
     5. Ensure that all opening brackets are properly closed.  
   `;
   if (userCustomPrompt) {
-    let system_prompt = `### Task
+    system_prompt = `### Task
     Write unit test and output only the generated unit test code which uses jasmine framework based on user query:
   `;
     userCustomPrompt = `\n\n User Query: ${userCustomPrompt}`;
@@ -258,7 +258,7 @@ async function main() {
     });
 
     const response = await openai.chat.completions.create({
-      temperature: 0.1,
+      temperature: 0,
       model: "gpt-3.5-turbo-16k",
       messages: [ASSISTANT, { role: "user", content: prompt_text }],
     });
@@ -279,7 +279,6 @@ async function main() {
     outputText = outputText.completion;
   }
 
-  console.log(outputText);
   if (outputText.endsWith("```")) {
     outputText = outputText.slice(0, outputText.length - 3);
   }
